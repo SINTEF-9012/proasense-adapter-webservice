@@ -21,4 +21,12 @@ import net.modelbased.proasense.adapter.base.AbstractBaseAdapter;
 
 public abstract class AbstractWebServiceAdapter extends AbstractBaseAdapter {
     protected WebServiceConsumerInput inputPort;
+
+    public AbstractWebServiceAdapter() {
+        // Web Service input port properties
+        // Read properties
+
+        this.inputPort = new WebServiceConsumerInput();
+
+    }
 }

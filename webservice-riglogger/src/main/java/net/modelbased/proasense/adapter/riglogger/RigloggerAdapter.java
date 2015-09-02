@@ -17,7 +17,85 @@
  */
 package net.modelbased.proasense.adapter.riglogger;
 
+import eu.proasense.internal.ComplexValue;
+import eu.proasense.internal.SimpleEvent;
+import eu.proasense.internal.VariableType;
 import net.modelbased.proasense.adapter.webservice.AbstractWebServiceAdapter;
+import org.joda.time.DateTime;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class RigloggerAdapter extends AbstractWebServiceAdapter {
+
+    public RigloggerAdapter() {
+        // Write code here that:
+        // 1. Reads data from the input port (not provided in the base net.modelbased.proasense.adapter.base)
+        String input = "{\"variable_type\":\"1002311\",\"value\":138.2346,\"variable_timestamp\":\"2014-02-14T07:01:24.133Z\"}";
+        // 2. Converts read data to simple events
+        SimpleEvent event = convertToSimpleEvent(input);
+        // 3. Publishes simple events to the output port
+        this.outputPort.publishSimpleEvent(event);
+    }
+
+
+    private SimpleEvent convertToSimpleEvent(String input) {
+        // Input format: "{\"variable_type\":\"1002311\",\"value\":138.2346,\"variable_timestamp\":\"2014-02-14T07:01:24.133Z\"}";
+
+        input = input.replace("\"", "");
+        input = input.replace("{", "");
+        input = input.replace("variable_type:", "");
+        input = input.replace("value:", "");
+        input = input.replace("variable_timestamp:", "");
+        input = input.replace("}", "");
+
+        String[] parts = input.split(",");
+        System.out.println("parts[0] = " + parts[0]);
+        System.out.println("parts[1] = " + parts[1]);
+        System.out.println("parts[2] = " + parts[2]);
+
+        long timestamp = new DateTime(parts[2]).getMillis();
+        String sensorId = parts[0];
+
+        // Define complex value
+        ComplexValue value = new ComplexValue();
+        value.setValue(parts[1]);
+        value.setType(VariableType.LONG);
+
+        // Define measurement
+        Map<String, ComplexValue> measurement = new HashMap<String, ComplexValue>();
+        measurement.put("raw.value", value);
+
+        SimpleEvent event = new SimpleEvent();
+        event.setTimestamp(timestamp);
+        event.setSensorId(convertTagToSensorId(sensorId));
+        event.setEventProperties(measurement);
+
+        return event;
+    }
+
+
+    private String convertTagToSensorId(String tag) {
+        String sensorId = "";
+
+        if(tag.matches("1000693"))
+            sensorId = "MHWirth.DDM.DrillingRPM";
+        else if(tag.matches("1000700"))
+            sensorId = "MHWirth.DDM.DrillingTorque";
+        else if(tag.matches("1002311"))
+            sensorId = "MHWirth.DDM.HookLoad";
+        else if(tag.matches("1000695"))
+            sensorId = "MHWirth.DDM.GearLubeOilTemp";
+        else if(tag.matches("1000692"))
+            sensorId = "MHWirth.DDM.GearBoxPressure";
+        else if(tag.matches("1000696"))
+            sensorId = "MHWirth.DDM.SwivelOilTemp";
+        else if(tag.matches("1002123"))
+            sensorId = "MHWirth.DrillBit.WeightOnBit";
+        else if(tag.matches("1033619"))
+            sensorId = "MHWirth.DrillBit.WeightOnBit";
+
+        return sensorId;
+    };
+
 }
