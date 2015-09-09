@@ -10,6 +10,7 @@
     <modules>
         <module>webservice-base</module>
         <module>webservice-riglogger</module>
+        <module>webservice-wsklima</module>
     </modules>
 
     <name>proasense-adapter-base Maven Webapp</name>
