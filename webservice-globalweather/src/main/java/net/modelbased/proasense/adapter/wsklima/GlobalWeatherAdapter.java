@@ -26,10 +26,10 @@ import org.joda.time.DateTime;
 import java.util.HashMap;
 import java.util.Map;
 
-public class WSKlimaAdapter extends AbstractWebServiceAdapter {
+public class GlobalWeatherAdapter extends AbstractWebServiceAdapter {
 
 
-    public WSKlimaAdapter() {
+    public GlobalWeatherAdapter() {
         // Write code here that:
         // 1. Reads data from the input port (not provided in the base net.modelbased.proasense.adapter.base)
         String input = "{\"variable_type\":\"1002311\",\"value\":138.2346,\"variable_timestamp\":\"2014-02-14T07:01:24.133Z\"}";

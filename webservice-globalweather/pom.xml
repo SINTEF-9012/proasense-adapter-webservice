@@ -10,7 +10,7 @@
         <version>1.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>webservice-riglogger</artifactId>
+    <artifactId>webservice-wsklima</artifactId>
     <version>1.0-SNAPSHOT</version>
 
     <dependencies>
@@ -45,7 +45,7 @@
                             <sourceRoot>${project.build.directory}/generated/cxf</sourceRoot>
                             <wsdlOptions>
                                 <wsdlOption>
-                                    <wsdl>${basedir}/src/wsdl/service1.wsdl</wsdl>
+                                    <wsdl>${basedir}/src/wsdl/globalweather.wsdl</wsdl>
                                 </wsdlOption>
                             </wsdlOptions>
                         </configuration>
