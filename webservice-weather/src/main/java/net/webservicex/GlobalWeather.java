@@ -15,7 +15,7 @@ import javax.xml.ws.Service;
  * 
  */
 @WebServiceClient(name = "GlobalWeather", 
-                  wsdlLocation = "file:/W:/GitHub/proasense-adapter-webservice/webservice-globalweather/src/wsdl/globalweather.wsdl",
+                  wsdlLocation = "http://www.webservicex.net/globalweather.asmx?WSDL",
                   targetNamespace = "http://www.webserviceX.NET") 
 public class GlobalWeather extends Service {
 
@@ -29,11 +29,11 @@ public class GlobalWeather extends Service {
     static {
         URL url = null;
         try {
-            url = new URL("file:/W:/GitHub/proasense-adapter-webservice/webservice-globalweather/src/wsdl/globalweather.wsdl");
+            url = new URL("http://www.webservicex.net/globalweather.asmx?WSDL");
         } catch (MalformedURLException e) {
             java.util.logging.Logger.getLogger(GlobalWeather.class.getName())
                 .log(java.util.logging.Level.INFO, 
-                     "Can not initialize the default wsdl from {0}", "file:/W:/GitHub/proasense-adapter-webservice/webservice-globalweather/src/wsdl/globalweather.wsdl");
+                     "Can not initialize the default wsdl from {0}", "file:/W:/GitHub/proasense-adapter-webservice/webservice-weather/src/wsdl/weather.wsdl");
         }
         WSDL_LOCATION = url;
     }

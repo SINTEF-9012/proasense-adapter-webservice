@@ -9,8 +9,8 @@
 
     <modules>
         <module>webservice-base</module>
-        <module>webservice-globalweather</module>
         <module>webservice-riglogger</module>
+        <module>webservice-weather</module>
     </modules>
 
     <name>proasense-adapter-base Maven Webapp</name>

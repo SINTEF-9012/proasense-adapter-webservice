@@ -18,11 +18,15 @@
 package net.modelbased.proasense.adapter.webservice;
 
 import net.modelbased.proasense.adapter.base.AbstractBaseAdapter;
+import org.apache.log4j.Logger;
 
 public abstract class AbstractWebServiceAdapter extends AbstractBaseAdapter {
     protected WebServiceConsumerInput inputPort;
 
-    public AbstractWebServiceAdapter() {
+    public final static Logger logger = Logger.getLogger(AbstractWebServiceAdapter.class);
+
+
+    protected AbstractWebServiceAdapter() {
         // Web Service input port properties
         // Read properties
 
