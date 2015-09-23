@@ -22,8 +22,8 @@ public interface GlobalWeatherSoap {
      * Get all major cities by country name(full / part).
      */
     @WebMethod(operationName = "GetCitiesByCountry", action = "http://www.webserviceX.NET/GetCitiesByCountry")
-    @RequestWrapper(localName = "GetCitiesByCountry", targetNamespace = "http://www.webserviceX.NET", className = "net.webservicex.GetCitiesByCountry")
-    @ResponseWrapper(localName = "GetCitiesByCountryResponse", targetNamespace = "http://www.webserviceX.NET", className = "net.webservicex.GetCitiesByCountryResponse")
+    @RequestWrapper(localName = "GetCitiesByCountry", targetNamespace = "http://www.webserviceX.NET", className = "GetCitiesByCountry")
+    @ResponseWrapper(localName = "GetCitiesByCountryResponse", targetNamespace = "http://www.webserviceX.NET", className = "GetCitiesByCountryResponse")
     @WebResult(name = "GetCitiesByCountryResult", targetNamespace = "http://www.webserviceX.NET")
     public String getCitiesByCountry(
             @WebParam(name = "CountryName", targetNamespace = "http://www.webserviceX.NET")
@@ -34,8 +34,8 @@ public interface GlobalWeatherSoap {
      * Get weather report for all major cities around the world.
      */
     @WebMethod(operationName = "GetWeather", action = "http://www.webserviceX.NET/GetWeather")
-    @RequestWrapper(localName = "GetWeather", targetNamespace = "http://www.webserviceX.NET", className = "net.webservicex.GetWeather")
-    @ResponseWrapper(localName = "GetWeatherResponse", targetNamespace = "http://www.webserviceX.NET", className = "net.webservicex.GetWeatherResponse")
+    @RequestWrapper(localName = "GetWeather", targetNamespace = "http://www.webserviceX.NET", className = "GetWeather")
+    @ResponseWrapper(localName = "GetWeatherResponse", targetNamespace = "http://www.webserviceX.NET", className = "GetWeatherResponse")
     @WebResult(name = "GetWeatherResult", targetNamespace = "http://www.webserviceX.NET")
     public String getWeather(
             @WebParam(name = "CityName", targetNamespace = "http://www.webserviceX.NET")
