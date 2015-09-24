@@ -10,6 +10,7 @@
     <modules>
         <module>webservice-base</module>
         <module>webservice-globalweather</module>
+        <module>webservice-stockquote</module>
         <module>webservice-riglogger</module>
         <module>webservice-weather</module>
     </modules>

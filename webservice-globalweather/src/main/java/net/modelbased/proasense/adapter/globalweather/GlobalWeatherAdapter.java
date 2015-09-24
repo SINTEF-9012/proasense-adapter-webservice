@@ -38,15 +38,18 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathFactory;
 
+import org.apache.log4j.Logger;
 import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
 
 
 public class GlobalWeatherAdapter extends AbstractWebServiceAdapter {
+    public final static Logger logger = Logger.getLogger(GlobalWeatherAdapter.class);
+
     private String S_TOPIC;
     private String S_SENSORID;
-    private String S_CITY;
-    private String S_COUNTRY;
+    private String S_QUERY_CITY;
+    private String S_QUERY_COUNTRY;
 
     public GlobalWeatherAdapter() {
         // Get common adapter properties
@@ -54,33 +57,33 @@ public class GlobalWeatherAdapter extends AbstractWebServiceAdapter {
         this.S_SENSORID = adapterProperties.getProperty("proasense.adapter.base.sensorid");
 
         // Get specific adapter properties
-        this.S_CITY     = adapterProperties.getProperty("proasense.adapter.weather.city");
-        this.S_COUNTRY  = adapterProperties.getProperty("proasense.adapter.weather.country");
-        int I_POLLTIME  = new Integer(adapterProperties.getProperty("proasense.adapter.weather.polltime")).intValue();
+        int I_POLL_INTERVAL     = new Integer(adapterProperties.getProperty("proasense.adapter.weather.poll.interval")).intValue();
+        this.S_QUERY_CITY       = adapterProperties.getProperty("proasense.adapter.weather.query.city");
+        this.S_QUERY_COUNTRY    = adapterProperties.getProperty("proasense.adapter.weather.query.country");
 
         // Get Web service
         GlobalWeather weatherService = new GlobalWeather();
-        AbstractWebServiceAdapter.logger.debug("WSDL = " + weatherService.getWSDLDocumentLocation().toString());
+        logger.debug("WSDL = " + weatherService.getWSDLDocumentLocation().toString());
 
         GlobalWeatherSoap weatherSoap = weatherService.getGlobalWeatherSoap();
-        AbstractWebServiceAdapter.logger.debug("weatherSoap = " + weatherService);
+        logger.debug("weatherSoap = " + weatherSoap);
 
         while (true) {
             try {
                 // 1. Read data from Web service
-                String result = weatherSoap.getWeather(S_CITY, S_COUNTRY);
-                AbstractWebServiceAdapter.logger.debug("result = " + result.toString());
+                String result = weatherSoap.getWeather(S_QUERY_CITY, S_QUERY_COUNTRY);
+                logger.debug("result = " + result.toString());
 
                 // 2. Convert read data to simple event
                 SimpleEvent event = convertToSimpleEvent(result);
-                AbstractWebServiceAdapter.logger.debug("SimpleEvent = " + event.toString());
+                logger.debug("SimpleEvent = " + event.toString());
 
                 // 3. Publish simple event to the output port
                 this.outputPort.publishSimpleEvent(event);
 
-                TimeUnit.MINUTES.sleep(I_POLLTIME);
+                TimeUnit.MINUTES.sleep(I_POLL_INTERVAL);
             } catch (Exception e) {
-                AbstractWebServiceAdapter.logger.debug(e.getClass().getName() + ": " + e.getMessage());
+                System.out.println(e.getClass().getName() + ": " + e.getMessage());
             }
         }
     }
@@ -98,7 +101,7 @@ public class GlobalWeatherAdapter extends AbstractWebServiceAdapter {
 
         // Add location
         String location = xPath.compile("/CurrentWeather/Location").evaluate(doc);
-        AbstractWebServiceAdapter.logger.debug("location = " + location);
+        logger.debug("location = " + location.trim());
         ComplexValue value = new ComplexValue();
         value.setValue(location);
         value.setType(VariableType.STRING);
@@ -107,9 +110,9 @@ public class GlobalWeatherAdapter extends AbstractWebServiceAdapter {
         // Add time
         String[] dates = xPath.compile("/CurrentWeather/Time").evaluate(doc).split("/");
         String date = dates[0];
-        AbstractWebServiceAdapter.logger.debug("date = " + date);
+        logger.debug("date = " + date.trim());
         SimpleDateFormat dateFormat = new SimpleDateFormat("MMM D, YYYY - hh:mm a z");
-        AbstractWebServiceAdapter.logger.debug("parsed date = " + dateFormat.parse(date).toString());
+        logger.debug("parsed date = " + dateFormat.parse(date).toString());
 //        DateTime dateTime = ISODateTimeFormat.dateTimeParser().parseDateTime(date);
         value = new ComplexValue();
         value.setValue(date);
@@ -118,7 +121,7 @@ public class GlobalWeatherAdapter extends AbstractWebServiceAdapter {
 
         // Add wind
         String wind = xPath.compile("/CurrentWeather/Wind").evaluate(doc);
-        AbstractWebServiceAdapter.logger.debug("wind = " + wind);
+        logger.debug("wind = " + wind.trim());
         value = new ComplexValue();
         value.setValue(wind);
         value.setType(VariableType.STRING);
@@ -126,7 +129,7 @@ public class GlobalWeatherAdapter extends AbstractWebServiceAdapter {
 
         // Add visibility
         String visibility = xPath.compile("/CurrentWeather/Visibility").evaluate(doc);
-        AbstractWebServiceAdapter.logger.debug("visibility = " + visibility);
+        logger.debug("visibility = " + visibility.trim());
         value = new ComplexValue();
         value.setValue(visibility);
         value.setType(VariableType.STRING);
@@ -134,7 +137,7 @@ public class GlobalWeatherAdapter extends AbstractWebServiceAdapter {
 
         // Add sky conditions
         String skyConditions = xPath.compile("/CurrentWeather/SkyConditions").evaluate(doc);
-        AbstractWebServiceAdapter.logger.debug("skyConditions = " + skyConditions);
+        logger.debug("skyConditions = " + skyConditions.trim());
         value = new ComplexValue();
         value.setValue(skyConditions);
         value.setType(VariableType.STRING);
@@ -142,7 +145,7 @@ public class GlobalWeatherAdapter extends AbstractWebServiceAdapter {
 
         // Add temperature
         String temperature = xPath.compile("/CurrentWeather/Temperature").evaluate(doc);
-        AbstractWebServiceAdapter.logger.debug("temperature = " + temperature);
+        logger.debug("temperature = " + temperature.trim());
         value = new ComplexValue();
         value.setValue(temperature);
         value.setType(VariableType.STRING);
@@ -150,7 +153,7 @@ public class GlobalWeatherAdapter extends AbstractWebServiceAdapter {
 
         // Add dew point
         String dewPoint = xPath.compile("/CurrentWeather/DewPoint").evaluate(doc);
-        AbstractWebServiceAdapter.logger.debug("dewPoint = " + dewPoint);
+        logger.debug("dewPoint = " + dewPoint.trim());
         value = new ComplexValue();
         value.setValue(dewPoint);
         value.setType(VariableType.STRING);
@@ -158,7 +161,7 @@ public class GlobalWeatherAdapter extends AbstractWebServiceAdapter {
 
         // Add relative humidity
         String relativeHumidity = xPath.compile("/CurrentWeather/RelativeHumidity").evaluate(doc);
-        AbstractWebServiceAdapter.logger.debug("relativeHumidity = " + relativeHumidity);
+        logger.debug("relativeHumidity = " + relativeHumidity.trim());
         value = new ComplexValue();
         value.setValue(relativeHumidity);
         value.setType(VariableType.STRING);
@@ -166,7 +169,7 @@ public class GlobalWeatherAdapter extends AbstractWebServiceAdapter {
 
         // Add pressure
         String pressure = xPath.compile("/CurrentWeather/Pressure").evaluate(doc);
-        AbstractWebServiceAdapter.logger.debug("pressure = " + pressure);
+        logger.debug("pressure = " + pressure.trim());
         value = new ComplexValue();
         value.setValue(pressure);
         value.setType(VariableType.STRING);

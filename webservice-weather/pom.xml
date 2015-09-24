@@ -10,7 +10,7 @@
         <version>1.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>webservice-wsklima</artifactId>
+    <artifactId>webservice-weather</artifactId>
     <version>1.0-SNAPSHOT</version>
 
     <dependencies>
@@ -64,7 +64,7 @@
                             <sourceRoot>${project.build.directory}/generated/cxf</sourceRoot>
                             <wsdlOptions>
                                 <wsdlOption>
-                                    <wsdl>${basedir}/src/wsdl/globalweather.wsdl</wsdl>
+                                    <wsdl>${basedir}/src/wsdl/weather.wsdl</wsdl>
                                 </wsdlOption>
                             </wsdlOptions>
                         </configuration>

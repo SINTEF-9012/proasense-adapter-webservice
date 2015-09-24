@@ -17,10 +17,6 @@
  */
 package net.modelbased.proasense.adapter.weather;
 
-import com.cdyne.ws.weatherws.ArrayOfForecast;
-import com.cdyne.ws.weatherws.ArrayOfWeatherDescription;
-import com.cdyne.ws.weatherws.Forecast;
-import com.cdyne.ws.weatherws.ForecastReturn;
 import com.cdyne.ws.weatherws.Weather;
 import com.cdyne.ws.weatherws.WeatherReturn;
 import com.cdyne.ws.weatherws.WeatherSoap;
@@ -28,14 +24,17 @@ import eu.proasense.internal.ComplexValue;
 import eu.proasense.internal.SimpleEvent;
 import eu.proasense.internal.VariableType;
 import net.modelbased.proasense.adapter.webservice.AbstractWebServiceAdapter;
+import org.apache.log4j.Logger;
 
 import java.io.IOException;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
+
 public class WeatherAdapter extends AbstractWebServiceAdapter {
+    public final static Logger logger = Logger.getLogger(WeatherAdapter.class);
+
     private String S_TOPIC;
     private String S_SENSORID;
 
@@ -46,20 +45,20 @@ public class WeatherAdapter extends AbstractWebServiceAdapter {
         this.S_SENSORID   = adapterProperties.getProperty("proasense.adapter.base.sensorid");
 
         // Get specific adapter properties
-        String S_ZIP        = adapterProperties.getProperty("proasense.adapter.weather.zip");
-        int I_POLLTIME      = new Integer(adapterProperties.getProperty("proasense.adapter.weather.polltime")).intValue();
+        int I_POLL_INTERVAL = new Integer(adapterProperties.getProperty("proasense.adapter.weather.poll.interval")).intValue();
+        String S_QUERY_ZIP  = adapterProperties.getProperty("proasense.adapter.weather.query.zip");
 
         // Get Web service
         Weather weatherService = new Weather();
         logger.debug("WSDL = " + weatherService.getWSDLDocumentLocation().toString());
 
         WeatherSoap weatherSoap = weatherService.getWeatherSoap();
-        logger.debug("weatherSoap = " + weatherService);
+        logger.debug("weatherSoap = " + weatherSoap);
 
         while (true) {
             try {
                 // 1. Read data from Web service
-                WeatherReturn result = weatherSoap.getCityWeatherByZIP("94025");
+                WeatherReturn result = weatherSoap.getCityWeatherByZIP(S_QUERY_ZIP);
                 logger.debug("result = " + result.toString());
 
                 // 2. Convert read data to simple event
@@ -69,7 +68,7 @@ public class WeatherAdapter extends AbstractWebServiceAdapter {
                 // 3. Publish simple event to the output port
                 this.outputPort.publishSimpleEvent(event);
 
-                TimeUnit.MINUTES.sleep(I_POLLTIME);
+                TimeUnit.MINUTES.sleep(I_POLL_INTERVAL);
             } catch (Exception e) {
                 logger.debug(e.getClass().getName() + ": " + e.getMessage());
             }
