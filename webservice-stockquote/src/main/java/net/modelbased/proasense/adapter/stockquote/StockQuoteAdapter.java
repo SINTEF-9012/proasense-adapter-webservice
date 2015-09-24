@@ -34,15 +34,7 @@ import java.util.List;
 public class StockQuoteAdapter extends AbstractWebServiceAdapter {
     public final static Logger logger = Logger.getLogger(StockQuoteAdapter.class);
 
-    private String S_TOPIC;
-    private String S_SENSORID;
-    private String S_QUERY_TICKERS;
-
     public StockQuoteAdapter() {
-        // Get common adapter properties
-        this.S_TOPIC = adapterProperties.getProperty("proasense.adapter.base.topic");
-        this.S_SENSORID = adapterProperties.getProperty("proasense.adapter.base.sensorid");
-
         // Get specific adapter properties
         String S_WSDL_URL = adapterProperties.getProperty("proasense.adapter.webservice.wsdl.url");
         String[] S_CONFIG_SYMBOLS = adapterProperties.getProperty("proasense.adapter.stock.config.symbols").split(",");
