@@ -15,7 +15,7 @@ import javax.xml.ws.Service;
  * 
  */
 @WebServiceClient(name = "StockQuote", 
-                  wsdlLocation = "http://www.webservicex.net/stockquote.asmx?WSDL",
+                  wsdlLocation = "file:/W:/GitHub/proasense-adapter-webservice/webservice-stockquote/src/wsdl/stockquote.wsdl",
                   targetNamespace = "http://www.webserviceX.NET/") 
 public class StockQuote extends Service {
 
@@ -29,7 +29,7 @@ public class StockQuote extends Service {
     static {
         URL url = null;
         try {
-            url = new URL("http://www.webservicex.net/stockquote.asmx?WSDL");
+            url = new URL("file:/W:/GitHub/proasense-adapter-webservice/webservice-stockquote/src/wsdl/stockquote.wsdl");
         } catch (MalformedURLException e) {
             java.util.logging.Logger.getLogger(StockQuote.class.getName())
                 .log(java.util.logging.Level.INFO, 
