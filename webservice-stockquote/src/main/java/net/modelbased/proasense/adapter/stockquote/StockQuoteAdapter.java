@@ -17,29 +17,18 @@
  */
 package net.modelbased.proasense.adapter.stockquote;
 
-import eu.proasense.internal.ComplexValue;
-import eu.proasense.internal.SimpleEvent;
-import eu.proasense.internal.VariableType;
-
 import net.modelbased.proasense.adapter.webservice.AbstractWebServiceAdapter;
+
 import net.webservicex.StockQuote;
 import net.webservicex.StockQuoteSoap;
 
 import org.apache.log4j.Logger;
-import org.w3c.dom.Document;
-import org.xml.sax.InputSource;
-
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.xpath.XPath;
-import javax.xml.xpath.XPathFactory;
 
 import java.io.IOException;
-import java.io.StringReader;
-import java.text.SimpleDateFormat;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.TimeUnit;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 
 
 public class StockQuoteAdapter extends AbstractWebServiceAdapter {
@@ -51,124 +40,44 @@ public class StockQuoteAdapter extends AbstractWebServiceAdapter {
 
     public StockQuoteAdapter() {
         // Get common adapter properties
-        this.S_TOPIC    = adapterProperties.getProperty("proasense.adapter.base.topic");
+        this.S_TOPIC = adapterProperties.getProperty("proasense.adapter.base.topic");
         this.S_SENSORID = adapterProperties.getProperty("proasense.adapter.base.sensorid");
 
         // Get specific adapter properties
-        int I_POLL_INTERVAL     = new Integer(adapterProperties.getProperty("proasense.adapter.stock.poll.interval")).intValue();
-        this.S_QUERY_TICKERS    = adapterProperties.getProperty("proasense.adapter.stock.query.tickers");
+        String S_WSDL_URL = adapterProperties.getProperty("proasense.adapter.webservice.wsdl.url");
+        String[] S_CONFIG_SYMBOLS = adapterProperties.getProperty("proasense.adapter.stock.config.symbols").split(",");
 
-        // Get Web service
-        StockQuote stockService = new StockQuote();
-        logger.debug("WSDL = " + stockService.getWSDLDocumentLocation().toString());
+        // Configure symbols
+        List<SymbolConfig> symbolConfigs = new ArrayList<SymbolConfig>();
+        if ((S_CONFIG_SYMBOLS.length % 3) == 0) {
 
-        StockQuoteSoap stockSoap = stockService.getStockQuoteSoap();
-        logger.debug("stockSoap = " + stockSoap);
-
-        while (true) {
-            try {
-                // 1. Read data from Web service
-                String result = stockSoap.getQuote("MSFT");
-                logger.debug("result = " + result.toString());
-
-                // 2. Convert read data to simple event
-                SimpleEvent event = convertToSimpleEvent(result);
-                logger.debug("SimpleEvent = " + event.toString());
-
-                // 3. Publish simple event to the output port
-                this.outputPort.publishSimpleEvent(event);
-
-                TimeUnit.MINUTES.sleep(I_POLL_INTERVAL);
-            } catch (Exception e) {
-                System.out.println(e.getClass().getName() + ": " + e.getMessage());
+            int i = 0;
+            while (i < S_CONFIG_SYMBOLS.length) {
+                String symbol = S_CONFIG_SYMBOLS[i];
+                String sensorId = S_CONFIG_SYMBOLS[i + 1];
+                int pollInterval = new Integer(S_CONFIG_SYMBOLS[i + 2]).intValue();
+                symbolConfigs.add(new SymbolConfig(symbol, sensorId, pollInterval));
+                i = i + 3;
             }
+        } else {
+            logger.error("The 'proasense.adapter.stock.config.symbols' configuration parameter was not properly set.");
+            System.exit(-1);
         }
-    }
 
+        // Run threads polling the Web service
+        try {
+            StockQuote stockService = new StockQuote(new URL(S_WSDL_URL));
+            logger.debug("WSDL = " + stockService.getWSDLDocumentLocation().toString());
 
-    private SimpleEvent convertToSimpleEvent(String input) throws Exception {
-        // Convert XML input to DOM object
-        Document doc = loadXMLFromString(input);
+            StockQuoteSoap stockSoap = stockService.getStockQuoteSoap();
+            logger.debug("stockSoap = " + stockSoap);
 
-        // Use XPath to parse XML document
-        XPath xPath = XPathFactory.newInstance().newXPath();
-
-        // Define event properties and add complex values
-        Map<String, ComplexValue> properties = new HashMap<String, ComplexValue>();
-
-        // Add name
-        String name = xPath.compile("/StockQuotes/Stock/Name").evaluate(doc);
-        logger.debug("name = " + name);
-        ComplexValue value = new ComplexValue();
-        value.setValue(name);
-        value.setType(VariableType.STRING);
-        properties.put("name", value);
-
-        // Add symbol
-        String symbol = xPath.compile("/StockQuotes/Stock/Symbol").evaluate(doc);
-        logger.debug("symbol = " + symbol);
-        value = new ComplexValue();
-        value.setValue(symbol);
-        value.setType(VariableType.STRING);
-        properties.put("symbol", value);
-
-        // Add last
-        String last = xPath.compile("/StockQuotes/Stock/Last").evaluate(doc);
-        logger.debug("last = " + last);
-        value = new ComplexValue();
-        value.setValue(last);
-        value.setType(VariableType.DOUBLE);
-        properties.put("last", value);
-
-        // Add date
-        String date = xPath.compile("/StockQuotes/Stock/Date").evaluate(doc);
-        logger.debug("date = " + date);
-        value = new ComplexValue();
-        value.setValue(date);
-        value.setType(VariableType.STRING);
-        properties.put("date", value);
-
-        // Add time
-        String time = xPath.compile("/StockQuotes/Stock/Time").evaluate(doc);
-        logger.debug("time = " + time);
-        value = new ComplexValue();
-        value.setValue(time);
-        value.setType(VariableType.STRING);
-        properties.put("time", value);
-
-        // Add change
-        String change = xPath.compile("/StockQuotes/Stock/Change").evaluate(doc);
-        logger.debug("change = " + change);
-        value = new ComplexValue();
-        value.setValue(change);
-        value.setType(VariableType.DOUBLE);
-        properties.put("change", value);
-
-        // Add percentage change
-        String percentageChange = xPath.compile("/StockQuotes/Stock/PercentageChange").evaluate(doc);
-        logger.debug("percentageChange = " + percentageChange);
-        value = new ComplexValue();
-        value.setValue(percentageChange);
-        value.setType(VariableType.DOUBLE);
-        properties.put("percentageChange", value);
-
-        // Create simple event
-        SimpleEvent event = new SimpleEvent();
-        event.setSensorId(this.S_SENSORID);
-        event.setTimestamp(System.currentTimeMillis());
-        event.setEventProperties(properties);
-
-        return event;
-    }
-
-
-    public static Document loadXMLFromString(String xml) throws Exception
-    {
-        DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-        DocumentBuilder builder = factory.newDocumentBuilder();
-        InputSource is = new InputSource(new StringReader(xml));
-
-        return builder.parse(is);
+            for (SymbolConfig sc : symbolConfigs) {
+                new StockQuoteStream(sc, System.currentTimeMillis(), stockSoap, this.outputPort);
+            }
+        } catch (MalformedURLException e) {
+            System.out.println(e.getClass().getName() + ": " + e.getMessage());
+        }
     }
 
 
