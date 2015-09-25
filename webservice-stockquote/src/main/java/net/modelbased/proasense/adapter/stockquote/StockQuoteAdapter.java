@@ -42,7 +42,6 @@ public class StockQuoteAdapter extends AbstractWebServiceAdapter {
         // Configure symbols
         List<SymbolConfig> symbolConfigs = new ArrayList<SymbolConfig>();
         if ((S_CONFIG_SYMBOLS.length % 3) == 0) {
-
             int i = 0;
             while (i < S_CONFIG_SYMBOLS.length) {
                 String symbol = S_CONFIG_SYMBOLS[i];

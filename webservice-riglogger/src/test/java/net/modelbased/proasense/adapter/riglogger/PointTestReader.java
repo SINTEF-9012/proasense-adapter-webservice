@@ -19,24 +19,25 @@ package net.modelbased.proasense.adapter.riglogger;
 
 import com.mhwirth.riglogger.proasenseadapter.ArrayOfMeasurement;
 import com.mhwirth.riglogger.proasenseadapter.Measurement;
-import com.mhwirth.riglogger.proasenseadapter.Service1;
 import com.mhwirth.riglogger.proasenseadapter.Service1Soap;
-
 import org.apache.log4j.Logger;
+import org.joda.time.DateTime;
 
 import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
-
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
+import java.util.List;
+import java.util.Random;
 import java.util.TimeZone;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.TimeUnit;
 
 
-public class PointSoapReader implements Runnable {
-    public final static Logger logger = Logger.getLogger(PointSoapReader.class);
+public class PointTestReader implements Runnable {
+    public final static Logger logger = Logger.getLogger(PointTestReader.class);
 
     private BlockingQueue<Measurement> queue;
     private PointConfig pointConfig;
@@ -44,7 +45,7 @@ public class PointSoapReader implements Runnable {
     private Service1Soap service1Soap;
 
 
-    public PointSoapReader(BlockingQueue<Measurement> queue, PointConfig pointConfig, long startTime, Service1Soap service1Soap) {
+    public PointTestReader(BlockingQueue<Measurement> queue, PointConfig pointConfig, long startTime, Service1Soap service1Soap) {
         this.queue = queue;
         this.pointConfig = pointConfig;
         this.startTime = startTime;
@@ -53,6 +54,8 @@ public class PointSoapReader implements Runnable {
 
 
     public void run() {
+        logger.debug("PointTestReader thread started.");
+
         // Set initial end date (current time)
         GregorianCalendar endDate = new GregorianCalendar();
         endDate.setTimeZone(TimeZone.getTimeZone("GMT"));
@@ -73,10 +76,10 @@ public class PointSoapReader implements Runnable {
                 // Start timer
                 long startTime = System.currentTimeMillis() / 1000;
 
-                // Read data from Web service
-                ArrayOfMeasurement measurementArray = service1Soap.getArchivedValues(this.pointConfig.getPoint(), xmlStartDate, xmlEndDate);
-                for (int i = 0; i < measurementArray.getMeasurement().size(); i++) {
-                    Measurement measurement = measurementArray.getMeasurement().get(i);
+                // Read data from generate test measurements method
+                List<Measurement> measurements = getGeneratedTestMeasurements(this.pointConfig.getPoint(), xmlStartDate, xmlEndDate);
+                for (int i = 0; i < measurements.size(); i++) {
+                    Measurement measurement = measurements.get(i);
                     queue.put(measurement);
                 }
 
@@ -102,6 +105,45 @@ public class PointSoapReader implements Runnable {
                 System.out.println(e.getClass().getName() + ": " + e.getMessage());
             }
         }
+    }
+
+
+    private List<Measurement> getGeneratedTestMeasurements(String point, XMLGregorianCalendar xmlStartDate, XMLGregorianCalendar xmlEndDate) {
+        List<Measurement> result = new ArrayList<Measurement>();
+
+        Measurement measurement;
+        GregorianCalendar startDate = xmlStartDate.toGregorianCalendar();
+        startDate.setTimeZone(TimeZone.getTimeZone("GMT"));
+        GregorianCalendar endDate = xmlEndDate.toGregorianCalendar();
+        endDate.setTimeZone(TimeZone.getTimeZone("GMT"));
+
+        boolean is_generate = true;
+        while (is_generate) {
+            try {
+                // Generate random measurement
+                measurement = new Measurement();
+                measurement.setPoint(point);
+                Random random = new Random();
+                Double value = random.nextDouble();
+                measurement.setValue(value.toString());
+                int wait = random.nextInt(5);
+                startDate.add(Calendar.SECOND, wait);
+                measurement.setTimeStamp(DatatypeFactory.newInstance().newXMLGregorianCalendar(startDate));
+                result.add(measurement);
+
+                // Check times
+                if (startDate.getTimeInMillis() > endDate.getTimeInMillis()) {
+                    is_generate = false;
+                }
+//                logger.debug("startDate = " + new DateTime(startDate).toString());
+//                logger.debug("endDate   = " + new DateTime(endDate).toString());
+            } catch (DatatypeConfigurationException e) {
+                e.printStackTrace();
+            }
+        }
+
+
+        return result;
     }
 
 }

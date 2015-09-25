@@ -67,7 +67,7 @@ public class PointKafkaWriter implements Runnable {
                 }
 
                 // Publish simple event
-//                this.outputPort.publishSimpleEvent(event);
+                this.outputPort.publishSimpleEvent(event);
                 logger.debug("simpleEvent = " + event.toString());
 
                 // Update timestamps
