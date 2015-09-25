@@ -22,14 +22,15 @@ import com.mhwirth.riglogger.proasenseadapter.Service1Soap;
 import net.modelbased.proasense.adapter.base.KafkaProducerOutput;
 
 import java.util.ArrayList;
+import java.util.GregorianCalendar;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-public class RigloggerStreamTest {
+public class PointTestReaderKafkaWriterStream {
 
-    public RigloggerStreamTest(PointConfig pointConfig, long startTime, Service1Soap service1Soap, KafkaProducerOutput outputPort) {
+    public PointTestReaderKafkaWriterStream(PointConfig pointConfig, GregorianCalendar startDate, Service1Soap service1Soap, KafkaProducerOutput outputPort, boolean publishKafka) {
         // Blocking queue for multi-threaded application
         int NO_BLOCKINGQUEUE_SIZE = 1000000;
         BlockingQueue<Measurement> queue = new ArrayBlockingQueue<Measurement>(NO_BLOCKINGQUEUE_SIZE);
@@ -42,10 +43,10 @@ public class RigloggerStreamTest {
         ExecutorService executor = Executors.newFixedThreadPool(NO_TOTAL_THREADS);
 
         // Create thread for sensor reader
-        workers.add(new PointTestReader(queue, pointConfig, startTime, service1Soap));
+        workers.add(new PointTestReader(queue, pointConfig, startDate, service1Soap));
 
         // Create thread for sensor writer
-        workers.add(new PointKafkaWriter(queue, pointConfig, startTime, outputPort));
+        workers.add(new PointKafkaWriter(queue, pointConfig, startDate, outputPort, publishKafka));
 
         // Execute all threads
         for (int i = 0; i < NO_TOTAL_THREADS; i++) {

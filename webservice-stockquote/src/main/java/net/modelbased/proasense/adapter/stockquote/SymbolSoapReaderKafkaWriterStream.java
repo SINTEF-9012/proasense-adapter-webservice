@@ -27,9 +27,9 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-public class StockQuoteStream {
+public class SymbolSoapReaderKafkaWriterStream {
 
-    public StockQuoteStream(SymbolConfig symbolConfig, long startTime, StockQuoteSoap stockSoap, KafkaProducerOutput outputPort) {
+    public SymbolSoapReaderKafkaWriterStream(SymbolConfig symbolConfig, long startTime, StockQuoteSoap stockSoap, KafkaProducerOutput outputPort) {
         // Blocking queue for multi-threaded application
         int NO_BLOCKINGQUEUE_SIZE = 1000000;
         BlockingQueue<String> queue = new ArrayBlockingQueue<String>(NO_BLOCKINGQUEUE_SIZE);

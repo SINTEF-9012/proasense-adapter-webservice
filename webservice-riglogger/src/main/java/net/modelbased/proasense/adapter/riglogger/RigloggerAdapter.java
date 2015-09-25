@@ -29,6 +29,7 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.TimeZone;
@@ -40,25 +41,9 @@ public class RigloggerAdapter extends AbstractWebServiceAdapter {
     public RigloggerAdapter() {
         // Get specific adapter properties
         String S_WSDL_URL = adapterProperties.getProperty("proasense.adapter.webservice.wsdl.url");
+        boolean B_TEST_ENABLED = new Boolean(adapterProperties.getProperty("proasense.adapter.riglogger.test.enabled")).booleanValue();
+        int I_CONFIG_TIMEDELAY = new Integer(adapterProperties.getProperty("proasense.adapter.riglogger.config.timedelay")).intValue();
         String[] S_CONFIG_POINTS = adapterProperties.getProperty("proasense.adapter.riglogger.config.points").split(",");
-
-        Boolean B_START_SPECIFIC    = new Boolean(adapterProperties.getProperty("proasense.adapter.riglogger.start.specific")).booleanValue();
-        int I_START_YEAR            = new Integer(adapterProperties.getProperty("proasense.adapter.riglogger.start.year")).intValue();
-        int I_START_MONTH           = new Integer(adapterProperties.getProperty("proasense.adapter.riglogger.start.month")).intValue();
-        int I_START_DAY             = new Integer(adapterProperties.getProperty("proasense.adapter.riglogger.start.day")).intValue();
-        int I_START_HOUR            = new Integer(adapterProperties.getProperty("proasense.adapter.riglogger.start.hour")).intValue();
-        int I_START_MIN             = new Integer(adapterProperties.getProperty("proasense.adapter.riglogger.start.min")).intValue();
-        int I_START_SEC             = new Integer(adapterProperties.getProperty("proasense.adapter.riglogger.start.sec")).intValue();
-
-        GregorianCalendar startDate;
-        if (B_START_SPECIFIC) {
-            startDate = new GregorianCalendar(I_START_YEAR, I_START_MONTH, I_START_DAY, I_START_HOUR, I_START_MIN, I_START_SEC);
-        }
-        else {
-            startDate = new GregorianCalendar();
-        }
-        startDate.setTimeZone(TimeZone.getTimeZone("GMT"));
-        logger.debug("startDate = " + new DateTime(startDate).toString());
 
         // Configure symbols
         List<PointConfig> pointConfigs = new ArrayList<PointConfig>();
@@ -76,6 +61,13 @@ public class RigloggerAdapter extends AbstractWebServiceAdapter {
             System.exit(-1);
         }
 
+        // Set initial start date (adjusted with timedelay)
+        int subtractMinutes = 0 - I_CONFIG_TIMEDELAY;
+        GregorianCalendar startDate = new GregorianCalendar();
+        startDate.setTimeZone(TimeZone.getTimeZone("GMT"));
+        startDate.add(Calendar.MINUTE, subtractMinutes);
+        logger.debug("startDate = " + new DateTime(startDate).toString());
+
         // Run threads polling the Web service
         try {
             Service1 service1 = new Service1(new URL(S_WSDL_URL));
@@ -85,7 +77,7 @@ public class RigloggerAdapter extends AbstractWebServiceAdapter {
             logger.debug("service1Soap = " + service1Soap);
 
             for (PointConfig pc : pointConfigs) {
-                new RigloggerStream(pc, System.currentTimeMillis(), service1Soap, this.outputPort);
+                new PointSoapReaderKafkaWriterStream(pc, startDate, service1Soap, this.outputPort, B_TEST_ENABLED);
             }
         } catch (MalformedURLException e) {
             System.out.println(e.getClass().getName() + ": " + e.getMessage());

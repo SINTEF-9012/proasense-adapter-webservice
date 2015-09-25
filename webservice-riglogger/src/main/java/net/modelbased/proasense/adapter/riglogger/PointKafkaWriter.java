@@ -25,6 +25,7 @@ import net.modelbased.proasense.adapter.base.KafkaProducerOutput;
 import org.apache.log4j.Logger;
 
 import javax.xml.datatype.XMLGregorianCalendar;
+import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.BlockingQueue;
@@ -39,14 +40,17 @@ public class PointKafkaWriter implements Runnable {
     private long startTime;
     private KafkaProducerOutput outputPort;
 
-    private long lastTimestamp;
+    long lastTimestamp;
+    private boolean kafkaPublish;
 
-    public PointKafkaWriter(BlockingQueue<Measurement> queue, PointConfig pointConfig, long startTime, KafkaProducerOutput outputPort) {
+    public PointKafkaWriter(BlockingQueue<Measurement> queue, PointConfig pointConfig, GregorianCalendar startDate, KafkaProducerOutput outputPort, boolean kafkaPublish) {
         this.queue = queue;
         this.pointConfig = pointConfig;
-        this.startTime = startTime;
+        this.startTime = startDate.getTimeInMillis();
         this.outputPort = outputPort;
-        this.lastTimestamp = startTime;
+
+        this.lastTimestamp = this.startTime;
+        this.kafkaPublish = kafkaPublish;
     }
 
 
@@ -67,7 +71,9 @@ public class PointKafkaWriter implements Runnable {
                 }
 
                 // Publish simple event
-                this.outputPort.publishSimpleEvent(event);
+                if (this.kafkaPublish) {
+                    this.outputPort.publishSimpleEvent(event);
+                }
                 logger.debug("simpleEvent = " + event.toString());
 
                 // Update timestamps

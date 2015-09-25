@@ -64,7 +64,7 @@ public class StockQuoteAdapter extends AbstractWebServiceAdapter {
             logger.debug("stockSoap = " + stockSoap);
 
             for (SymbolConfig sc : symbolConfigs) {
-                new StockQuoteStream(sc, System.currentTimeMillis(), stockSoap, this.outputPort);
+                new SymbolSoapReaderKafkaWriterStream(sc, System.currentTimeMillis(), stockSoap, this.outputPort);
             }
         } catch (MalformedURLException e) {
             System.out.println(e.getClass().getName() + ": " + e.getMessage());

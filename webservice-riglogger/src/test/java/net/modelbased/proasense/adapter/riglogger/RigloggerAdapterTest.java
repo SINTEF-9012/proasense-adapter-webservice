@@ -17,16 +17,13 @@
  */
 package net.modelbased.proasense.adapter.riglogger;
 
-import com.mhwirth.riglogger.proasenseadapter.Service1;
-import com.mhwirth.riglogger.proasenseadapter.Service1Soap;
 import net.modelbased.proasense.adapter.webservice.AbstractWebServiceAdapter;
 import org.apache.log4j.Logger;
 import org.joda.time.DateTime;
 
 import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.TimeZone;
@@ -38,7 +35,11 @@ public class RigloggerAdapterTest extends AbstractWebServiceAdapter {
     public RigloggerAdapterTest() {
         // Get specific adapter properties
         String S_WSDL_URL = adapterProperties.getProperty("proasense.adapter.webservice.wsdl.url");
+        boolean B_KAFKA_PUBLISH = new Boolean(adapterProperties.getProperty("proasense.adapter.riglogger.kafka.publish")).booleanValue();
+        int I_CONFIG_TIMEDELAY = new Integer(adapterProperties.getProperty("proasense.adapter.riglogger.config.timedelay")).intValue();
         String[] S_CONFIG_POINTS = adapterProperties.getProperty("proasense.adapter.riglogger.config.points").split(",");
+
+        logger.debug("B_KAFKA_PUBLISH = " + B_KAFKA_PUBLISH);
 
         // Configure symbols
         List<PointConfig> pointConfigs = new ArrayList<PointConfig>();
@@ -56,14 +57,16 @@ public class RigloggerAdapterTest extends AbstractWebServiceAdapter {
             System.exit(-1);
         }
 
-        // Set current date as start date
+        // Set initial start date (adjusted with timedelay)
+        int subtractMinutes = 0 - I_CONFIG_TIMEDELAY;
         GregorianCalendar startDate = new GregorianCalendar();
         startDate.setTimeZone(TimeZone.getTimeZone("GMT"));
+        startDate.add(Calendar.MINUTE, subtractMinutes);
         logger.debug("startDate = " + new DateTime(startDate).toString());
 
-        // Run test threads using the genereated test measurements
+        // Run test threads using the generated test measurements
         for (PointConfig pc : pointConfigs) {
-            new RigloggerStreamTest(pc, startDate.getTimeInMillis(), null, this.outputPort);
+            new PointTestReaderKafkaWriterStream(pc, startDate, null, this.outputPort, B_KAFKA_PUBLISH);
         }
     }
 

@@ -41,14 +41,14 @@ public class PointTestReader implements Runnable {
 
     private BlockingQueue<Measurement> queue;
     private PointConfig pointConfig;
-    private long startTime;
+    private GregorianCalendar startDate;
     private Service1Soap service1Soap;
 
 
-    public PointTestReader(BlockingQueue<Measurement> queue, PointConfig pointConfig, long startTime, Service1Soap service1Soap) {
+    public PointTestReader(BlockingQueue<Measurement> queue, PointConfig pointConfig, GregorianCalendar startDate, Service1Soap service1Soap) {
         this.queue = queue;
         this.pointConfig = pointConfig;
-        this.startTime = startTime;
+        this.startDate = startDate;
         this.service1Soap = service1Soap;
     }
 
@@ -56,16 +56,14 @@ public class PointTestReader implements Runnable {
     public void run() {
         logger.debug("PointTestReader thread started.");
 
-        // Set initial end date (current time)
+        // Set initial polling end date (start date)
         GregorianCalendar endDate = new GregorianCalendar();
         endDate.setTimeZone(TimeZone.getTimeZone("GMT"));
+        endDate.setTime(startDate.getTime());
 
-        // Set initial start date (current time - pollInterval)
+        // Set initial polling start date (start date - poll interval)
         int subtractMinutes = 0 - this.pointConfig.getPollInterval();
-        GregorianCalendar startDate = new GregorianCalendar();
-        startDate.setTimeZone(TimeZone.getTimeZone("GMT"));
-        startDate.setTime(endDate.getTime());
-        startDate.add(Calendar.MINUTE, subtractMinutes);
+        this.startDate.add(Calendar.MINUTE, subtractMinutes);
 
         while (true) {
             try {
@@ -74,7 +72,7 @@ public class PointTestReader implements Runnable {
                 XMLGregorianCalendar xmlStartDate = DatatypeFactory.newInstance().newXMLGregorianCalendar(startDate);
 
                 // Start timer
-                long startTime = System.currentTimeMillis() / 1000;
+                long startTime = System.currentTimeMillis();
 
                 // Read data from generate test measurements method
                 List<Measurement> measurements = getGeneratedTestMeasurements(this.pointConfig.getPoint(), xmlStartDate, xmlEndDate);
@@ -83,20 +81,21 @@ public class PointTestReader implements Runnable {
                     queue.put(measurement);
                 }
 
-                // Update start date (last retrieval date)
+                // Update start date (last retrieval date is the end date)
                 startDate.setTime(endDate.getTime());
 
-                // Update end date (current time)
-                endDate = new GregorianCalendar();
+                // Update end date (add new poll interval)
+                endDate.add(Calendar.MINUTE, this.pointConfig.getPollInterval());
 
                 // Check time
-                long endTime = System.currentTimeMillis() / 1000;
+                long endTime = System.currentTimeMillis();
                 long elapsedTime = endTime - startTime;
-                long waitTime = this.pointConfig.getPollInterval()*60 - elapsedTime;
+                long waitTime = this.pointConfig.getPollInterval()*60*1000 - elapsedTime;
                 logger.debug("waitTime = " + waitTime);
 
+                // Wait the remaining milliseconds of the poll interval
                 if (waitTime > 0)
-                    TimeUnit.SECONDS.sleep(waitTime);
+                    TimeUnit.MILLISECONDS.sleep(waitTime);
             }
             catch (DatatypeConfigurationException e) {
                 System.out.println(e.getClass().getName() + ": " + e.getMessage());
