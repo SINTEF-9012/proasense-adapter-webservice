@@ -15,8 +15,8 @@
         <module>webservice-weather</module>
     </modules>
 
-    <name>proasense-adapter-base Maven Webapp</name>
-    <url>http://maven.apache.org</url>
+    <name>proasense-adapter-base</name>
+    <url>https://github.com/SINTEF-9012/proasense-adapter-webservice</url>
 
     <repositories>
         <repository>

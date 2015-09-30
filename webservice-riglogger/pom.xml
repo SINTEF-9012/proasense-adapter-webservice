@@ -33,6 +33,24 @@
 
     <build>
         <plugins>
+            <!-- Allows the adapter to be run via 'mvn compile exec:java' -->
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <version>1.2.1</version>
+                <configuration>
+                    <mainClass>net.modelbased.proasense.adapter.riglogger.RigloggerAdapter</mainClass>
+                    <includePluginDependencies>false</includePluginDependencies>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>2.12.4</version>
+                <configuration>
+                    <skipTests>true</skipTests>
+                </configuration>
+            </plugin>
             <plugin>
                 <groupId>org.apache.cxf</groupId>
                 <artifactId>cxf-codegen-plugin</artifactId>
@@ -40,7 +58,7 @@
                 <executions>
                     <execution>
                         <id>generate-sources</id>
-                        <phase>generate-sources</phase>
+                        <phase>none</phase>
                         <configuration>
                             <sourceRoot>${project.build.directory}/generated/cxf</sourceRoot>
                             <wsdlOptions>

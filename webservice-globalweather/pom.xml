@@ -33,25 +33,16 @@
 
     <build>
         <plugins>
-            <!--
+            <!-- Allows the adapter to be run via 'mvn compile exec:java' -->
             <plugin>
-                <groupId>org.jvnet.jax-ws-commons</groupId>
-                <artifactId>jaxws-maven-plugin</artifactId>
-                <version>2.3</version>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <version>1.2.1</version>
                 <configuration>
-                    <vmArgs>
-                        <vmArg>-extension -Djavax.xml.accessExternalSchema=all</vmArg>
-                    </vmArgs>
+                    <mainClass>net.modelbased.proasense.adapter.globalweather.GlobalWeatherAdapter</mainClass>
+                    <includePluginDependencies>false</includePluginDependencies>
                 </configuration>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>wsimport</goal>
-                        </goals>
-                    </execution>
-                </executions>
             </plugin>
-            -->
             <plugin>
                 <groupId>org.apache.cxf</groupId>
                 <artifactId>cxf-codegen-plugin</artifactId>
@@ -59,7 +50,7 @@
                 <executions>
                     <execution>
                         <id>generate-sources</id>
-                        <phase>generate-sources</phase>
+                        <phase>none</phase>
                         <configuration>
                             <sourceRoot>${project.build.directory}/generated/cxf</sourceRoot>
                             <wsdlOptions>
