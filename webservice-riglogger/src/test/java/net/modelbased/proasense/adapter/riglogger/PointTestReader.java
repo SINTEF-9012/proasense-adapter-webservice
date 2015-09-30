@@ -123,8 +123,8 @@ public class PointTestReader implements Runnable {
                 measurement = new Measurement();
                 measurement.setPoint(point);
                 Random random = new Random();
-                Double value = random.nextDouble();
-                measurement.setValue(value.toString());
+                Float value = random.nextFloat();
+                measurement.setValue(value);
                 int wait = random.nextInt(5);
                 startDate.add(Calendar.SECOND, wait);
                 measurement.setTimeStamp(DatatypeFactory.newInstance().newXMLGregorianCalendar(startDate));

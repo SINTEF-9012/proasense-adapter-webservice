@@ -92,7 +92,7 @@ public class PointKafkaWriter implements Runnable {
 
         // Add value
         ComplexValue complexValue = new ComplexValue();
-        String value = (String)measurement.getValue();
+        String value = String.valueOf(new Float(measurement.getValue().toString()));
         complexValue.setValue(value);
         complexValue.setType(VariableType.DOUBLE);
         properties.put("value", complexValue);
