@@ -43,7 +43,7 @@ public class PointKafkaWriter implements Runnable {
     long lastTimestamp;
     private boolean kafkaPublish;
 
-    public PointKafkaWriter(BlockingQueue<Measurement> queue, PointConfig pointConfig, GregorianCalendar startDate, KafkaProducerOutput outputPort, boolean kafkaPublish) {
+    public PointKafkaWriter(BlockingQueue<Measurement> queue, PointConfig pointConfig, GregorianCalendar startDate, KafkaProducerOutput outputPort) {
         this.queue = queue;
         this.pointConfig = pointConfig;
         this.startTime = startDate.getTimeInMillis();
@@ -71,9 +71,7 @@ public class PointKafkaWriter implements Runnable {
                 }
 
                 // Publish simple event
-                if (this.kafkaPublish) {
-                    this.outputPort.publishSimpleEvent(event);
-                }
+                this.outputPort.publishSimpleEvent(event);
                 logger.debug("simpleEvent = " + event.toString());
 
                 // Update timestamps

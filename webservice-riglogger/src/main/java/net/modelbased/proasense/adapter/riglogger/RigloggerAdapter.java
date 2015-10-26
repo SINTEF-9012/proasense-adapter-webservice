@@ -41,7 +41,6 @@ public class RigloggerAdapter extends AbstractWebServiceAdapter {
     public RigloggerAdapter() {
         // Get specific adapter properties
         String S_WSDL_URL = adapterProperties.getProperty("proasense.adapter.webservice.wsdl.url");
-        boolean B_TEST_ENABLED = new Boolean(adapterProperties.getProperty("proasense.adapter.riglogger.test.enabled")).booleanValue();
         int I_CONFIG_TIMEDELAY = new Integer(adapterProperties.getProperty("proasense.adapter.riglogger.config.timedelay")).intValue();
         String[] S_CONFIG_POINTS = adapterProperties.getProperty("proasense.adapter.riglogger.config.points").split(",");
 
@@ -77,7 +76,7 @@ public class RigloggerAdapter extends AbstractWebServiceAdapter {
             logger.debug("service1Soap = " + service1Soap);
 
             for (PointConfig pc : pointConfigs) {
-                new PointSoapReaderKafkaWriterStream(pc, startDate, service1Soap, this.outputPort, B_TEST_ENABLED);
+                new PointSoapReaderKafkaWriterStream(pc, startDate, service1Soap, this.outputPort);
             }
         } catch (MalformedURLException e) {
             System.out.println(e.getClass().getName() + ": " + e.getMessage());
