@@ -41,7 +41,6 @@ public class PointKafkaWriter implements Runnable {
     private KafkaProducerOutput outputPort;
 
     long lastTimestamp;
-    private boolean kafkaPublish;
 
     public PointKafkaWriter(BlockingQueue<Measurement> queue, PointConfig pointConfig, GregorianCalendar startDate, KafkaProducerOutput outputPort) {
         this.queue = queue;
@@ -50,7 +49,6 @@ public class PointKafkaWriter implements Runnable {
         this.outputPort = outputPort;
 
         this.lastTimestamp = this.startTime;
-        this.kafkaPublish = kafkaPublish;
     }
 
 
@@ -90,9 +88,17 @@ public class PointKafkaWriter implements Runnable {
 
         // Add value
         ComplexValue complexValue = new ComplexValue();
-        String value = String.valueOf(new Float(measurement.getValue().toString()));
-        complexValue.setValue(value);
-        complexValue.setType(VariableType.DOUBLE);
+        String value;
+        if (this.pointConfig.getType().toUpperCase().equals("FLOAT")) {
+            value = String.valueOf(new Float(measurement.getValue().toString()));
+            complexValue.setValue(value);
+            complexValue.setType(VariableType.DOUBLE);
+        }
+        else if (this.pointConfig.getType().toUpperCase().equals("BOOLEAN")) {
+            value = String.valueOf(new Boolean(measurement.getValue().toString().toLowerCase()));
+            complexValue.setValue(value);
+            complexValue.setType(VariableType.BOOLEAN);
+        }
         properties.put("value", complexValue);
 
         SimpleEvent event = new SimpleEvent();

@@ -39,18 +39,17 @@ public class RigloggerAdapterTest extends AbstractWebServiceAdapter {
         int I_CONFIG_TIMEDELAY = new Integer(adapterProperties.getProperty("proasense.adapter.riglogger.config.timedelay")).intValue();
         String[] S_CONFIG_POINTS = adapterProperties.getProperty("proasense.adapter.riglogger.config.points").split(",");
 
-        logger.debug("B_KAFKA_PUBLISH = " + B_KAFKA_PUBLISH);
-
         // Configure symbols
         List<PointConfig> pointConfigs = new ArrayList<PointConfig>();
-        if ((S_CONFIG_POINTS.length % 3) == 0) {
+        if ((S_CONFIG_POINTS.length % 4) == 0) {
             int i = 0;
             while (i < S_CONFIG_POINTS.length) {
                 String point = S_CONFIG_POINTS[i];
                 String sensorId = S_CONFIG_POINTS[i + 1];
-                int pollInterval = new Integer(S_CONFIG_POINTS[i + 2]).intValue();
-                pointConfigs.add(new PointConfig(point, sensorId, pollInterval));
-                i = i + 3;
+                String type = S_CONFIG_POINTS[i + 2];
+                int pollInterval = new Integer(S_CONFIG_POINTS[i + 3]).intValue();
+                pointConfigs.add(new PointConfig(point, sensorId, type, pollInterval));
+                i = i + 4;
             }
         } else {
             logger.error("The 'proasense.adapter.riglogger.config.points' configuration parameter was not properly set.");
@@ -66,7 +65,7 @@ public class RigloggerAdapterTest extends AbstractWebServiceAdapter {
 
         // Run test threads using the generated test measurements
         for (PointConfig pc : pointConfigs) {
-            new PointTestReaderKafkaWriterStream(pc, startDate, null, this.outputPort, B_KAFKA_PUBLISH);
+            new PointTestReaderKafkaWriterStream(pc, startDate, null, this.outputPort);
         }
     }
 

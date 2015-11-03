@@ -21,12 +21,14 @@ package net.modelbased.proasense.adapter.riglogger;
 public class PointConfig {
     private String point;
     private String sensorId;
+    private String type;
     private int pollInterval;
 
 
-    public PointConfig(String pointId, String sensorId, int pollInterval) {
+    public PointConfig(String pointId, String sensorId, String type, int pollInterval) {
         this.point = pointId;
         this.sensorId = sensorId;
+        this.type = type;
         this.pollInterval = pollInterval;
     }
 
@@ -39,6 +41,9 @@ public class PointConfig {
     public String getSensorId() {
         return this.sensorId;
     }
+
+
+    public String getType() { return this.type; }
 
 
     public int getPollInterval() {

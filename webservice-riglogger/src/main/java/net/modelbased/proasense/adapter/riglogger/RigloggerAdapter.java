@@ -46,14 +46,15 @@ public class RigloggerAdapter extends AbstractWebServiceAdapter {
 
         // Configure symbols
         List<PointConfig> pointConfigs = new ArrayList<PointConfig>();
-        if ((S_CONFIG_POINTS.length % 3) == 0) {
+        if ((S_CONFIG_POINTS.length % 4) == 0) {
             int i = 0;
             while (i < S_CONFIG_POINTS.length) {
                 String point = S_CONFIG_POINTS[i];
                 String sensorId = S_CONFIG_POINTS[i + 1];
-                int pollInterval = new Integer(S_CONFIG_POINTS[i + 2]).intValue();
-                pointConfigs.add(new PointConfig(point, sensorId, pollInterval));
-                i = i + 3;
+                String type = S_CONFIG_POINTS[i + 2];
+                int pollInterval = new Integer(S_CONFIG_POINTS[i + 3]).intValue();
+                pointConfigs.add(new PointConfig(point, sensorId, type, pollInterval));
+                i = i + 4;
             }
         } else {
             logger.error("The 'proasense.adapter.riglogger.config.points' configuration parameter was not properly set.");
