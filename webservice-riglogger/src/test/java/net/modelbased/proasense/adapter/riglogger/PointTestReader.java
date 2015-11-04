@@ -117,7 +117,9 @@ public class PointTestReader implements Runnable {
         endDate.setTimeZone(TimeZone.getTimeZone("GMT"));
 
         boolean is_generate = true;
+        int i = 0;
         while (is_generate) {
+            i++;
             try {
                 // Generate random measurement
                 measurement = new Measurement();
@@ -125,12 +127,24 @@ public class PointTestReader implements Runnable {
                 Random random = new Random();
 
                 if (this.pointConfig.getType().toUpperCase().equals("FLOAT")) {
-                    Float value = random.nextFloat();
-                    measurement.setValue(value);
+                    if ((i % 10) == 0) {
+                        String value = "timeout";
+                        measurement.setValue(value);
+                    }
+                    else {
+                        Float value = random.nextFloat();
+                        measurement.setValue(value);
+                    }
                 }
                 else if (this.pointConfig.getType().toUpperCase().equals("BOOLEAN")) {
-                    Boolean value = random.nextBoolean();
-                    measurement.setValue(value);
+                    if ((i % 10) == 0) {
+                        String value = "timeout";
+                        measurement.setValue(value);
+                    }
+                    else {
+                        Boolean value = random.nextBoolean();
+                        measurement.setValue(value);
+                    }
                 }
                 int wait = random.nextInt(5);
                 startDate.add(Calendar.SECOND, wait);

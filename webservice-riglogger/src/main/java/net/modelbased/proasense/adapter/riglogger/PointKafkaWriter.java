@@ -61,19 +61,21 @@ public class PointKafkaWriter implements Runnable {
                 // Convert measurement to simple event
                 SimpleEvent event = convertToSimpleEvent(measurement);
 
-                // Check timestamp
-                long eventTimestamp = event.getTimestamp();
-                long timeDiff = eventTimestamp - this.lastTimestamp;
-                if (timeDiff > 0) {
-                    TimeUnit.MILLISECONDS.sleep(timeDiff);
+                if (event != null) {
+                    // Check timestamp
+                    long eventTimestamp = event.getTimestamp();
+                    long timeDiff = eventTimestamp - this.lastTimestamp;
+                    if (timeDiff > 0) {
+                        TimeUnit.MILLISECONDS.sleep(timeDiff);
+                    }
+
+                    // Publish simple event
+                    this.outputPort.publishSimpleEvent(event);
+                    logger.debug("simpleEvent = " + event.toString());
+
+                    // Update timestamps
+                    this.lastTimestamp = eventTimestamp;
                 }
-
-                // Publish simple event
-                this.outputPort.publishSimpleEvent(event);
-                logger.debug("simpleEvent = " + event.toString());
-
-                // Update timestamps
-                this.lastTimestamp = eventTimestamp;
             }
             catch (Exception e) {
                 System.out.println(e.getClass().getName() + ": " + e.getMessage());
@@ -90,19 +92,30 @@ public class PointKafkaWriter implements Runnable {
         ComplexValue complexValue = new ComplexValue();
         String value;
         if (this.pointConfig.getType().toUpperCase().equals("FLOAT")) {
-            value = String.valueOf(new Float(measurement.getValue().toString()));
-            complexValue.setValue(value);
-            complexValue.setType(VariableType.DOUBLE);
+            try {
+                value = String.valueOf(new Float(measurement.getValue().toString()));
+                complexValue.setValue(value);
+                complexValue.setType(VariableType.DOUBLE);
+            }
+            catch (NumberFormatException e) {
+                return null;
+            }
         }
         else if (this.pointConfig.getType().toUpperCase().equals("BOOLEAN")) {
-            value = String.valueOf(new Boolean(measurement.getValue().toString().toLowerCase()));
-            complexValue.setValue(value);
-            complexValue.setType(VariableType.BOOLEAN);
+            String measurementValue = measurement.getValue().toString().toLowerCase();
+            if (measurementValue.equals("true") || measurementValue.equals("false")) {
+                value = String.valueOf(new Boolean(measurement.getValue().toString().toLowerCase()));
+                complexValue.setValue(value);
+                complexValue.setType(VariableType.BOOLEAN);
+            }
+            else {
+                return null;
+            }
         }
         properties.put("value", complexValue);
 
         SimpleEvent event = new SimpleEvent();
-        event.setTimestamp(convertXMLDateToMillis(measurement.getTimeStamp()));
+            event.setTimestamp(convertXMLDateToMillis(measurement.getTimeStamp()));
         event.setSensorId(this.pointConfig.getSensorId());
         event.setEventProperties(properties);
 
