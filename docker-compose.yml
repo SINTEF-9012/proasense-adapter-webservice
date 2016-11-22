@@ -1,0 +1,18 @@
+version: '2'
+services:
+#  kafka:
+#    container_name: kafka
+#    image: spotify/kafka
+#    ports:
+#      - "2181:2181"
+#      - "9092:9092"
+  webservice-riglogger:
+    build: webservice-riglogger/
+    container_name: webservice-riglogger
+#    depends_on:
+#      - kafka
+#    links:
+#      - kafka:kafka_host
+#    environment:
+#      - ZOOKEEPER_CONNECT=kafka_host:2181
+#      - KAFKA_BOOTSTRAP_SERVERS=kafka_host:9092
